@@ -1,0 +1,25 @@
+{
+  "name": "movehub-server",
+  "version": "0.1.0",
+  "description": "Server and client implementation to show boost movehub in browser.",
+  "keywords": [
+    "BLE",
+    "Movehub",
+    "Lego",
+    "Boost",
+    "Bluetooth",
+    "server",
+    "expressjs"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "calamari <g.tavonius@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
