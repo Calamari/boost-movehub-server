@@ -10,12 +10,14 @@ let isConnected = false;
 let r2;
 let r2Values = {};
 let sockets = [];
+let cmdQueue = [];
+
+const app = express();
+
+const server = http.createServer(app);
+const io = socketIO(server);
 
 function sendToSockets(type) {
-  // sockets.forEach(socket => {
-  //   console.log("sending to", socket.id);
-  // socket.emit("data", { type, value: r2Values[type] });
-  // });
   io.emit("data", type, r2Values[type]);
 }
 
@@ -67,7 +69,8 @@ boost.on("hubConnected", async hub => {
       r2Values.turnedDegrees = degrees;
       sendToSockets("turnedDegrees");
     });
-    await r2.wheels.turnLeft(10, 10);
+
+    processR2Queue();
   } catch (err) {
     console.error(err);
   }
@@ -75,16 +78,27 @@ boost.on("hubConnected", async hub => {
 
 boost.startScanning();
 
-const app = express();
+function callOnR2(part, cmd, args) {
+  if (r2) {
+    r2[part][cmd](...args);
+  } else {
+    cmdQueue.push([part, cmd, args]);
+  }
+}
+function processR2Queue() {
+  cmdQueue.forEach((part, cmd, args) => callOnR2(part, cmd, args));
+  cmdQueue = [];
+}
 
-const server = http.createServer(app);
-const io = socketIO(server);
 io.on("connection", socket => {
   console.log("Socket connected");
   sockets.push(socket);
   socket.on("disconnect", () => {
     // Remove socket on disconnect
     sockets = sockets.filter(s => socket.id !== s.id);
+  });
+  socket.on("cmd", (part, cmd, args) => {
+    callOnR2(part, cmd, args);
   });
 });
 
