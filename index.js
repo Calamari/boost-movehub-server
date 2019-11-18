@@ -1,6 +1,7 @@
 const { Boost, R2D2 } = require("boost-movehub");
 // const { Boost, R2D2 } = require("./src/stubs/BoostMovehub.js");
 const express = require("express");
+const cors = require("cors");
 const http = require("http");
 const socketIO = require("socket.io");
 
@@ -13,6 +14,8 @@ let sockets = [];
 let cmdQueue = [];
 
 const app = express();
+app.use(express.json());
+app.use(cors());
 
 const server = http.createServer(app);
 const io = socketIO(server);
@@ -105,6 +108,12 @@ io.on("connection", socket => {
 app.get("/", (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.send(JSON.stringify(r2Values));
+});
+
+app.post("/cmd/", (req, res) => {
+  r2[req.body.part][req.body.cmd](...(req.body.args || []));
+
+  res.send(true);
 });
 
 const port = process.env.PORT || 3000;
